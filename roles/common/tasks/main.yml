@@ -1,0 +1,21 @@
+- name: "Downloading Takipi for Debian/Ubuntu"
+  get_url: 'url="https://app.takipi.com/app/download?t=deb&r=chef" dest="/tmp/takipi.deb"'
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: "Downloading Takipi for RHEL/SUSE"
+  get_url: 'url="https://app.takipi.com/app/download?t=rpm&r=chef" dest="/tmp/takipi.rpm"'
+  when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Setup Takipi Location
+  file: path=/opt/takipi/etc state=directory
+
+- name: Run Takipi Setup Package
+  shell: chdir="/opt/takipi/etc" ./takipi-setup-package #{{SECRET_KEY}}
+
+- name: Check if /opt/takipi/work/secret.key exists
+  register: secret_key_file
+
+- name: Log "fail_message"
+  debug: var={{secret_key.isdir}} msg="Takipi failed to install. Did you forget to add a Takipi secret_key?"
+  when: secret_key_file.stat.isdir is defined and not secret_key_file.stat.isdir
+
