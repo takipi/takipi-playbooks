@@ -44,5 +44,5 @@
   register: secret_key_file
 
 - name: Log "fail_message"
-  debug: var={{secret_key_file}} msg="Takipi failed to install. Did you forget to add a Takipi secret_key?"
+  debug: var={{secret_key_file}} msg="Takipi failed to install. Takipi didn't recognise your OS or Did you forget to add a Takipi secret_key?"
   when: secret_key_file.stat.isfile is defined and not secret_key_file.stat.isfile
