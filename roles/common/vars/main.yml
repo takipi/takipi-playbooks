@@ -1,2 +1,2 @@
 takipi:
-	SECRET_KEY: "put your <secret key> here"
+  SECRET_KEY: "put your <secret key> here"

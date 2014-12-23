@@ -1,11 +1,5 @@
 ---
 # Setup/install tasks.
-- include: setup-RedHat.yml
-  when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-- include: setup-Debian.yml
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
 - name: Update apt cache.
   apt: update_cache=yes cache_valid_time=86400
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
@@ -29,11 +23,11 @@
   when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Installing Takipi for RHEL/SUSE
-  yum: name=/tmp/takipi.rpm state=present
+  yum: name=/tmp/takipi.rpm
   when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Installing Takipi for Ubuntu/Debian
-  apt: deb=/tmp/takipi.deb state=present
+  apt: deb=/tmp/takipi.deb
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Run Takipi Setup Package
@@ -43,6 +37,5 @@
   stat: path=/opt/takipi/work/secret.key
   register: secret_key_file
 
-- name: Log "fail_message"
-  debug: var={{secret_key_file}} msg="Takipi failed to install. Takipi didn't recognise your OS or Did you forget to add a Takipi secret_key?"
+- fail: msg="Takipi failed to install. Takipi didn't recognise your OS or Did you forget to add a Takipi secret_key?"
   when: secret_key_file.stat.isfile is defined and not secret_key_file.stat.isfile

@@ -1,3 +1,4 @@
-- hosts: takipi
+- hosts: all
+  sudo: true
   roles:
     - common
