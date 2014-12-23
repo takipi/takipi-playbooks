@@ -37,5 +37,6 @@
   stat: path=/opt/takipi/work/secret.key
   register: secret_key_file
 
-- fail: msg="Takipi failed to install. Takipi didn't recognise your OS or Did you forget to add a Takipi secret_key?"
+- name: Check if test on installation failed
+  fail: msg="Takipi failed to install. Takipi didn't recognise your OS or Did you forget to add a Takipi secret_key?"
   when: secret_key_file.stat.isfile is defined and not secret_key_file.stat.isfile
