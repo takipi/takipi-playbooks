@@ -26,7 +26,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # the path on the guest to mount the folder. And the optional third
     # argument is a set of non-required options.
     devel.vm.synced_folder "~/", "/host-home"
-    devel.vm.synced_folder "../vagrant", "/vagrant"
+    devel.vm.synced_folder ".", "/vagrant"
     
     # Provider-specific configuration so you can fine-tune various
     # backing providers for Vagrant. These expose provider-specific options.
@@ -51,6 +51,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     
     # Enable provisioning via Shell script.
-    devel.vm.provision "shell", path: "run-ansible-dev.sh", privileged: false, keep_color: true
+    #devel.vm.provision "shell", path: "run-ansible-dev.sh", privileged: false, keep_color: true
+    devel.vm.provision :ansible do |ansible|
+      ansible.playbook = "site.yml"
+      ansible.verbose = "vvv"
+    end
+
   end
 end

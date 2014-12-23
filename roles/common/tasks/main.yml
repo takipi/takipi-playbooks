@@ -2,33 +2,33 @@
 # Setup/install tasks.
 - name: Update apt cache.
   apt: update_cache=yes cache_valid_time=86400
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: ansible_os_family == 'Debian'
 
 - name: Ensure Java is installed.
   apt: "name={{ item }} state=installed"
   with_items: ['openjdk-7-jdk']
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: ansible_os_family == 'Debian'
 
 - name: Ensure Java is installed.
   yum: "name={{ item }} state=installed"
   with_items: ['java-1.7.0-openjdk']
-  when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
 
 - name: "Downloading Takipi for Debian/Ubuntu"
   get_url: 'url="https://app.takipi.com/app/download?t=deb&r=chef" dest="/tmp/takipi.deb"'
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: ansible_os_family == 'Debian'
 
 - name: "Downloading Takipi for RHEL/SUSE"
   get_url: 'url="https://app.takipi.com/app/download?t=rpm&r=chef" dest="/tmp/takipi.rpm"'
-  when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
 
 - name: Installing Takipi for RHEL/SUSE
   yum: name=/tmp/takipi.rpm
-  when: ansible_distribution == 'Suse' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
 
 - name: Installing Takipi for Ubuntu/Debian
   apt: deb=/tmp/takipi.deb
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: ansible_os_family == 'Debian'
 
 - name: Run Takipi Setup Package
   shell: "/opt/takipi/etc/takipi-setup-package '{{takipi.SECRET_KEY}}'"
