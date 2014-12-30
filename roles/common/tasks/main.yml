@@ -44,3 +44,4 @@
     that:
       - "'Daemon started successfully' in takipi_installation.stdout"
       - secret_key_file.stat.exists and secret_key_file.stat.isreg
+      - '"<Insert your secret key here>"' not in takipi.SECRET_KEY
