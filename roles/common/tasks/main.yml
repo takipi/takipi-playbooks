@@ -43,5 +43,6 @@
 - name: Check if Takipi Installation was successful
   assert: 
     that:
+      - not takipi.SECRET_KEY == ""
       - "'Daemon started successfully' in takipi_installation.stdout"
       - "secret_key_file.stat.exists and secret_key_file.stat.isreg"
