@@ -33,6 +33,7 @@
 - name: Run Takipi Setup Package
   shell: "/opt/takipi/etc/takipi-setup-package '{{takipi.SECRET_KEY}}'"
   register: takipi_installation
+  when: not takipi.SECRET_KEY == ""
 
 - name: Stat /opt/takipi/work/secret.key to check if it exists
   stat: path=/opt/takipi/work/secret.key
@@ -43,5 +44,4 @@
   assert: 
     that:
       - "'Daemon started successfully' in takipi_installation.stdout"
-      - secret_key_file.stat.exists and secret_key_file.stat.isreg
-      - '"<Insert your secret key here>"' not in takipi.SECRET_KEY
+      - "secret_key_file.stat.exists and secret_key_file.stat.isreg"
