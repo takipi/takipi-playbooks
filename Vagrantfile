@@ -8,10 +8,9 @@ Vagrant.require_version ">= 1.4.3"
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-	["centos/6", "centos/7", "ubuntu/14", "ubuntu/15"].each do |i|
-	  config.vm.define "devel_#{i}" do |node|
-	    #node.vm.box = "centos65-x86_64-20140116"
-	    node.vm.box = "#{i}"
+	["centos_6", "centos_7", "ubuntu_trusty64", "ubuntu_xenial64"].each do |i|
+	  config.vm.define "#{i}" do |node|
+	    node.vm.box = "#{i.sub '_', '/'}"
 	    
 	    # The url from where the 'node.vm.box' box will be fetched if it
 	    # doesn't already exist on the user's system.
