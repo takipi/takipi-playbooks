@@ -46,8 +46,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	      
 	    end
 	    
-	    # Enable provisioning via Shell script.
-	    #node.vm.provision "shell", path: "run-ansible-dev.sh", privileged: false, keep_color: true
+	    if i.include? "ubuntu"
+	        config.vm.provision "shell" do |s|
+    		   s.inline = "apt-get install -y python"
+  	        end
+	    end
+
 	    node.vm.provision :ansible do |ansible|
 	      ansible.playbook = "site.yml"
 	      ansible.verbose = "vvv"

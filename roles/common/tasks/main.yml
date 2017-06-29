@@ -6,12 +6,12 @@
 
 - name: Ensure Java is installed.
   apt: "name={{ item }} state=installed"
-  with_items: ['openjdk-7-jdk']
+  with_items: ["{{takipi.DEBIAN_JAVA_VERSION}}"]
   when: ansible_os_family == 'Debian'
 
 - name: Ensure Java is installed.
   yum: "name={{ item }} state=installed"
-  with_items: ['java-1.7.0-openjdk']
+  with_items: ["{{takipi.RHEL_JAVA_VERSION}}"]
   when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
 
 - name: "Downloading Takipi for Debian/Ubuntu"
