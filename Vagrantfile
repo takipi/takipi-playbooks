@@ -51,17 +51,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     		   s.inline = "apt-get install -y python"
   	        end
 	    end
-
 	    node.vm.provision :ansible do |ansible|
+	      if i.include? "ubuntu_trusty"
+		ansible.extra_vars = {
+		  "RHEL_JAVA_VERSION": "java-1.7.0-openjdk",
+		  "DEBIAN_JAVA_VERSION": "openjdk-7-jdk"
+		  }
+	      end
 	      ansible.playbook = "site.yml"
-	      ansible.verbose = "vvv"
-	      ansible.groups = {
-	        "takipi" => ["local"],
-	        "takipi:vars" => {"SECRET_KEY" => "S25327#evlYIBTPgZxlhoor#Zk7vFImQvCNfWPZOQs/HS9IXo1IsF1cT/6jXIg48SVc=#08db",
-	        }
-	      }
+	      ansible.verbose = "vv"
 	    end
-	
 	  end
 
 	end
