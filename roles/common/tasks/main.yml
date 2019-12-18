@@ -1,48 +1,90 @@
 ---
 # Setup/install tasks.
-- name: Update apt cache.
-  apt: update_cache=yes cache_valid_time=86400
+- name: Debian prerequisites
+  block:
+    - name: Update apt cache.
+      apt: update_cache=yes cache_valid_time=86400
+
+    - name: Ensure Java and wget are installed.
+      apt:
+        name: ["{{ takipiInternal.DEBIAN_JAVA_VERSION }}", wget]
+        state: present
   when: ansible_os_family == 'Debian'
 
-- name: Ensure Java is installed.
-  apt: "name={{ item }} state=installed"
-  with_items: ["{{ DEBIAN_JAVA_VERSION }}"]
-  when: ansible_os_family == 'Debian'
+- name: Red Hat prerequisites
+  block:
+    - name: Ensure Java and wget are installed.
+      yum:
+        name: ["{{takipiInternal.RHEL_JAVA_VERSION}}", wget]
+        state: installed
+      when: ansible_os_family == 'RedHat'
 
-- name: Ensure Java is installed.
-  yum: "name={{ item }} state=installed"
-  with_items: ["{{RHEL_JAVA_VERSION}}"]
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
+    - name: Installing Python SeLinux for RHEL rel <=7
+      yum:
+        name: libselinux-python
+        state: installed
+      when: ansible_distribution_version|int <= 7
 
-- name: "Downloading Takipi for Debian/Ubuntu"
-  get_url: 'url="https://app.takipi.com/app/download?t=deb&r=chef" dest="/tmp/takipi.deb"'
-  when: ansible_os_family == 'Debian'
+    - name: Installing Python SeLinux for RHEL rel >=8
+      yum:
+        name: python3-libselinux
+        state: installed
+      when: ansible_distribution_version|int >= 8
+  when: ansible_os_family == 'RedHat'
 
-- name: "Downloading Takipi for RHEL/SUSE"
-  get_url: 'url="https://app.takipi.com/app/download?t=rpm&r=chef" dest="/tmp/takipi.rpm"'
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
+- name: Package install
+  block:
+    - name: Debian OverOps install (deb)
+      block:
+        - name: "Downloading Takipi for Debian/Ubuntu"
+          get_url: 'url="https://app.overops.com/app/download?t=deb&r=chef" dest="/tmp/takipi.deb"'
 
-- name: Installing Takipi for RHEL/SUSE
-  yum: name=/tmp/takipi.rpm
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
+        - name: Installing Takipi for Ubuntu/Debian
+          apt:
+            deb: /tmp/takipi.deb
+      when: ansible_os_family == 'Debian'
 
-- name: Installing Takipi for Ubuntu/Debian
-  apt: deb=/tmp/takipi.deb
-  when: ansible_os_family == 'Debian'
+    - name: Red Hat OverOps install (rpm)
+      block:
+        - name: "Downloading Takipi for RHEL/SUSE"
+          get_url: 'url="https://app.overops.com/app/download?t=rpm&r=chef" dest="/tmp/takipi.rpm"'
 
-- name: Run Takipi Setup Package
-  shell: "/opt/takipi/etc/takipi-setup-package '{{takipi.SECRET_KEY}}'"
-  register: takipi_installation
-  when: not takipi.SECRET_KEY == ""
+        - name: Installing Takipi for RHEL/SUSE
+          yum:
+            name: /tmp/takipi.rpm
+      when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
 
-- name: Stat /opt/takipi/work/secret.key to check if it exists
-  stat: path=/opt/takipi/work/secret.key
+    - name: Run Takipi Setup Package
+      shell: "/opt/takipi/etc/takipi-setup-package '{{takipiSK.SECRET_KEY}}'"
+      register: takipi_installation
+      when: not takipiSK.SECRET_KEY == ""
+  when: takipi.OOINSTALLMODE == "package"
+
+- name: Tarball install
+  block:
+    - name: "Tarball install collector/bundle"
+      block:
+        - name: Run Takipi collector/bundle OneLiner Setup
+          shell: "{{takipiInternal.OOONELINER}} --sk='{{takipiSK.SECRET_KEY}}' --listen_on_port={{takipi.OOMODE.coll.port}}"
+          register: takipi_installation_coll
+      when: takipi.OOMODE.mode == "remoteCollector" or takipi.OOMODE.mode == "localCollector"
+
+    - name: Tarball install remote agent
+      block:
+        - name: Run Takipi remote agent OneLiner Setup
+          shell: "{{takipiInternal.OOONELINER}} --sk='{{takipiSKtakipiSK.SECRET_KEY}}' --collector_host={{takipi.OOMODE.coll.ip}} --collector_port={{takipi.OOMODE.coll.port}} --installer_url={{takipiInternal.OOINSTALLERURLAGENT}}"
+          register: takipi_installation_localagent
+      when: takipi.OOMODE.mode == "remoteAgent"
+  when: takipi.OOINSTALLMODE == "tarball" and not takipiSK.SECRET_KEY == ""
+
+- name: Stat /opt/takipi/installation.key to check if it exists
+  stat: path=/opt/takipi/installation.key
   register: secret_key_file
-  when: takipi_installation|success
+  when: takipi.OOMODE.mode != "remoteAgent"
 
-- name: Check if Takipi Installation was successful
-  assert: 
+- name: Check if Takipi Collector Installation was successful
+  assert:
     that:
-      - not takipi.SECRET_KEY == ""
-      - "'Daemon started successfully' in takipi_installation.stdout"
+      - not takipiSK.SECRET_KEY == ""
       - "secret_key_file.stat.exists and secret_key_file.stat.isreg"
+  when: takipi.OOMODE.mode != "remoteAgent"
