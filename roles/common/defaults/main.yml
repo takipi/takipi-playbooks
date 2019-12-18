@@ -1,0 +1,47 @@
+takipi:
+  # OOMODE can be either:
+  #    remoteAgent - for Agent ONLY pointing to a remote collector ip/port ( default )
+  #    remoteCollector - for remote Collector
+  #    localCollector - for local Collector + Agent
+  #
+  # Example stubs:
+  #
+  # OOMODE:
+  #  mode: "remoteAgent"
+  #  coll:
+  #    ip: "10.0.1.200"
+  #    port: 6060
+  #
+  # OOMODE:
+  #  mode: "remoteCollector"
+  #  coll:
+  #    ip: ""
+  #    port: 6060   # listening tcp port
+  #
+  # OOMODE:
+  #  mode: "localCollector"
+  #  coll:
+  #    ip: ""       # this is set to "127.0.0.1"
+  #    port: 6060   # this is both used for collector binging port and agent port
+  OOMODE:
+    mode: "remoteAgent"
+    coll:
+      ip: "10.0.1.1"
+      port: 6060
+
+  # OOINSTALLMODE can be either:
+  #    package - for yum/apt ( default )
+  #    tarball - for tarball + install script
+  OOINSTALLMODE: "tarball"
+
+takipiSK:
+  SECRET_KEY: "S3875#YAFwDEGg5oSIU+TM#G0G7VATLOqJIKtAMy1MObfFINaQmVT5hGYLQ+cpPuq4=#87a1"
+
+
+takipiInternal:
+  # do not modify UNLESS YOU REALLY KNOW WHAT YOU ARE DOING
+  OOONELINER: "wget -O - -o /dev/null http://get.takipi.com | bash /dev/stdin -i"
+  OOINSTALLERURLAGENT: "https://app.overops.com/app/download?t=sa-tgz"
+
+  DEBIAN_JAVA_VERSION: "openjdk-8-jdk"
+  RHEL_JAVA_VERSION: "java-1.8.0-openjdk"
